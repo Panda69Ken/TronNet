@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TronNet.Accounts;
+using TronNet.Protocol;
 
 namespace TronNet.Contracts
 {
@@ -11,8 +8,10 @@ namespace TronNet.Contracts
     {
         ContractProtocol Protocol { get; }
 
-        Task<string> TransferAsync(string contractAddress, ITronAccount ownerAccount, string toAddress, decimal amount, string memo, long feeLimit);
+        Task<(Return Return, Transaction Transaction)> TransferAsync(string contractAddress, ITronAccount ownerAccount, string toAddress, decimal amount, string memo, long feeLimit);
 
         Task<decimal> BalanceOfAsync(string contractAddress, ITronAccount ownerAccount);
+
+        Task<decimal> BalanceOfAsync(string contractAddress, string address);
     }
 }

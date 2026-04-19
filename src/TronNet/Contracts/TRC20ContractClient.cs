@@ -1,13 +1,6 @@
 ﻿using Google.Protobuf;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using TronNet.ABI;
 using TronNet.ABI.FunctionEncoding;
@@ -18,22 +11,15 @@ using TronNet.Protocol;
 
 namespace TronNet.Contracts
 {
-    class TRC20ContractClient : IContractClient
+    class TRC20ContractClient(ILogger<TRC20ContractClient> logger, IWalletClient walletClient, ITransactionClient transactionClient) : IContractClient
     {
-        private readonly ILogger<TRC20ContractClient> _logger;
-        private readonly IWalletClient _walletClient;
-        private readonly ITransactionClient _transactionClient;
+        private readonly ILogger<TRC20ContractClient> _logger = logger;
+        private readonly IWalletClient _walletClient = walletClient;
+        private readonly ITransactionClient _transactionClient = transactionClient;
 
         public ContractProtocol Protocol => ContractProtocol.TRC20;
 
-        public TRC20ContractClient(ILogger<TRC20ContractClient> logger, IWalletClient walletClient, ITransactionClient transactionClient)
-        {
-            _logger = logger;
-            _walletClient = walletClient;
-            _transactionClient = transactionClient;
-        }
-
-        private long GetDecimals(Wallet.WalletClient wallet, byte[] contractAddressBytes)
+        private async Task<long> GetDecimals(Wallet.WalletClient wallet, byte[] contractAddressBytes)
         {
             var trc20Decimals = new DecimalsFunction();
 
@@ -48,14 +34,14 @@ namespace TronNet.Contracts
                 Data = ByteString.CopyFrom(encodedHex.HexToByteArray()),
             };
 
-            var txnExt = wallet.TriggerConstantContract(trigger, headers: _walletClient.GetHeaders());
+            var txnExt = await wallet.TriggerConstantContractAsync(trigger, headers: _walletClient.GetHeaders());
 
             var result = txnExt.ConstantResult[0].ToByteArray().ToHex();
 
             return new FunctionCallDecoder().DecodeOutput<long>(result, new Parameter("uint8", "d"));
         }
 
-        public async Task<string> TransferAsync(string contractAddress, ITronAccount ownerAccount, string toAddress, decimal amount, string memo, long feeLimit)
+        public async Task<(Return Return, Transaction Transaction)> TransferAsync(string contractAddress, ITronAccount ownerAccount, string toAddress, decimal amount, string memo, long feeLimit)
         {
             var contractAddressBytes = Base58Encoder.DecodeFromBase58Check(contractAddress);
             var callerAddressBytes = Base58Encoder.DecodeFromBase58Check(toAddress);
@@ -75,7 +61,7 @@ namespace TronNet.Contracts
 
                 var toAddressHex = "0x" + toAddressBytes.ToHex();
 
-                var decimals = GetDecimals(wallet, contractAddressBytes);
+                var decimals = await GetDecimals(wallet, contractAddressBytes);
 
                 var tokenAmount = amount;
                 if (decimals > 0)
@@ -104,40 +90,51 @@ namespace TronNet.Contracts
                 if (!transactionExtention.Result.Result)
                 {
                     _logger.LogWarning($"[transfer]transfer failed, message={transactionExtention.Result.Message.ToStringUtf8()}.");
-                    return null;
+                    return (null, null);
                 }
 
                 var transaction = transactionExtention.Transaction;
 
                 if (transaction.Ret.Count > 0 && transaction.Ret[0].Ret == Transaction.Types.Result.Types.code.Failed)
                 {
-                    return null;
+                    return (null, null);
                 }
 
-                transaction.RawData.Data = ByteString.CopyFromUtf8(memo);
+                transaction.RawData.Data = ByteString.CopyFromUtf8(memo);   //交易備註要消耗1TRX
                 transaction.RawData.FeeLimit = feeLimit;
 
                 var transSign = _transactionClient.GetTransactionSign(transaction, ownerAccount.PrivateKey);
+                if (transSign == null)
+                {
+                    _logger.LogWarning($"创建USDT交易签名失败,transSign返回null");
+                    return (null, null);
+                }
 
                 var result = await _transactionClient.BroadcastTransactionAsync(transSign);
+                if (result == null || result.Code != Return.Types.response_code.Success)
+                {
+                    _logger.LogWarning($"发起USDT交易失败,code:{result.Code},msg:{result.Message.ToStringUtf8()}");
+                    return (null, null);
+                }
 
-                return transSign.GetTxid();
+                //return transSign.GetTxid();
+                return (result, transSign);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return null;
+                return (null, null);
             }
         }
 
-
-
-        public async Task<decimal> BalanceOfAsync(string contractAddress, ITronAccount ownerAccount)
+        public async Task<decimal> BalanceOfAsync(string contractAddress, string address)
         {
-            var contractAddressBytes = Base58Encoder.DecodeFromBase58Check(contractAddress);
-            var ownerAddressBytes = Base58Encoder.DecodeFromBase58Check(ownerAccount.Address);
             var wallet = _walletClient.GetProtocol();
+
+            var contractAddressBytes = Base58Encoder.DecodeFromBase58Check(contractAddress);
+            var ownerAddressBytes = Base58Encoder.DecodeFromBase58Check(address);
             var functionABI = ABITypedRegistry.GetFunctionABI<BalanceOfFunction>();
+
             try
             {
                 var addressBytes = new byte[20];
@@ -146,7 +143,7 @@ namespace TronNet.Contracts
                 var addressBytesHex = "0x" + addressBytes.ToHex();
 
                 var balanceOf = new BalanceOfFunction { Owner = addressBytesHex };
-                var decimals = GetDecimals(wallet, contractAddressBytes);
+                var decimals = await GetDecimals(wallet, contractAddressBytes);
 
                 var encodedHex = new FunctionCallEncoder().EncodeRequest(balanceOf, functionABI.Sha3Signature);
 
@@ -161,11 +158,13 @@ namespace TronNet.Contracts
 
                 if (!transactionExtention.Result.Result)
                 {
-                    throw new Exception(transactionExtention.Result.Message.ToStringUtf8());
+                    _logger.LogError($"获取地址钱包资产异常,contractAddress:{contractAddress},Address:{address},error:{transactionExtention.Result.Message.ToStringUtf8()}");
+                    return 0;
                 }
                 if (transactionExtention.ConstantResult.Count == 0)
                 {
-                    throw new Exception($"result error, ConstantResult length=0.");
+                    _logger.LogError($"获取地址钱包资产异常,contractAddress:{contractAddress},Address:{address},error:result error, ConstantResult length=0.");
+                    return 0;
                 }
 
                 var result = new FunctionCallDecoder().DecodeFunctionOutput<BalanceOfFunctionOutput>(transactionExtention.ConstantResult[0].ToByteArray().ToHex());
@@ -180,9 +179,14 @@ namespace TronNet.Contracts
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
-                throw;
+                _logger.LogError($"获取地址钱包资产异常,contractAddress:{contractAddress},Address:{address},error:{ex.Message}");
+                return 0;
             }
+        }
+
+        public async Task<decimal> BalanceOfAsync(string contractAddress, ITronAccount ownerAccount)
+        {
+            return await BalanceOfAsync(contractAddress, ownerAccount.Address);
         }
 
     }

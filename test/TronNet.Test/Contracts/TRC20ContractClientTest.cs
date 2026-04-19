@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
-using Xunit;
-using Microsoft.Extensions.DependencyInjection;
 using TronNet.Contracts;
+using Xunit;
 
 namespace TronNet.Test.Contracts
 {
@@ -36,7 +32,7 @@ namespace TronNet.Test.Contracts
 
             var result = await contractClient.TransferAsync(contractAddress, account, to, amount, string.Empty, feeAmount);
 
-            Assert.NotEmpty(result);
+            Assert.NotEmpty(result.Transaction.GetTxid());
         }
     }
 }

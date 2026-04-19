@@ -2,10 +2,6 @@
 using Grpc.Core;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TronNet.Accounts;
 using TronNet.Crypto;
 using TronNet.Protocol;
@@ -16,6 +12,7 @@ namespace TronNet
     {
         private readonly IGrpcChannelClient _channelClient;
         private readonly IOptions<TronNetOptions> _options;
+        private Random _rand;
 
         public WalletClient(IGrpcChannelClient channelClient, IOptions<TronNetOptions> options)
         {
@@ -82,9 +79,13 @@ namespace TronNet
 
         public Metadata GetHeaders()
         {
+            var num = _rand.Next(0, _options.Value.ApiKeys.Count);
+
+            var apiKey = _options.Value.ApiKeys[num];
+
             var headers = new Metadata
             {
-                { "TRON-PRO-API-KEY", _options.Value.ApiKey }
+                { "TRON-PRO-API-KEY", apiKey }
             };
 
             return headers;

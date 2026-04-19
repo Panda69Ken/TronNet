@@ -1,10 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using System;
 
 namespace TronNet.Test
 {
@@ -19,7 +15,7 @@ namespace TronNet.Test
                 x.Network = TronNetwork.MainNet;
                 x.Channel = new GrpcChannelOption { Host = "grpc.shasta.trongrid.io", Port = 50051 };
                 x.SolidityChannel = new GrpcChannelOption { Host = "grpc.shasta.trongrid.io", Port = 50052 };
-                x.ApiKey = "";
+                x.ApiKeys = ["e5162bcc-a938-47fc-87c3-7f1198765907"];
             });
             services.AddLogging();
             return services.BuildServiceProvider();

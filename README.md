@@ -141,3 +141,12 @@ namespace TronNetTest
 }
 
 ```
+
+#### 2026-04-19修改内容
+- 1.升级到Net8.0，相关库更新到最新稳定版
+- 2.更新最新的Protos文件
+- 3.配置实体TronNetOptions优化添加 ApiKeys 字段，删除ApiKey字段，支持多key随机使用
+- 4.优化WalletClient实体的GetHeaders方法，支持多key随机使用
+- 5.添加操作TRX交易与读余额的ITronAccountWallet接口与实现类
+- 6.优化IContractClient、TRC20ContractClient里的TransferAsync、BalanceOfAsync
+

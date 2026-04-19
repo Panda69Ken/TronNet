@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TronNet.Crypto;
 
 namespace TronNet
@@ -44,7 +40,7 @@ namespace TronNet
 
         internal byte GetPublicAddressPrefix()
         {
-            return _network == TronNetwork.MainNet ? 0x41 : 0xa0;
+            return (byte)(_network == TronNetwork.MainNet ? 0x41 : 0xa0);
         }
 
         public static string GetPublicAddress(string privateKey, TronNetwork network = TronNetwork.MainNet)

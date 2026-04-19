@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Google.Protobuf;
+using System;
 using System.Threading.Tasks;
-using Xunit;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using TronNet.Protocol;
-using Google.Protobuf;
 using TronNet.Crypto;
+using TronNet.Protocol;
+using Xunit;
 
 namespace TronNet.Test
 {
@@ -37,26 +32,36 @@ namespace TronNet.Test
 
             var transaction = transactionExtension.Transaction;
 
-            var transactionSignExtention = await _wallet.GetTransactionSign2Async(new TransactionSign
-            {
-                PrivateKey = ByteString.CopyFrom(privateStr.HexToByteArray()),
-                Transaction = transaction
-            });
-            Assert.NotNull(transactionSignExtention);
+            #region 原来的服务端签名已废弃
+            //var transactionSignExtention = await _wallet.GetTransactionSign2Async(new TransactionSign
+            //{
+            //    PrivateKey = ByteString.CopyFrom(privateStr.HexToByteArray()),
+            //    Transaction = transaction
+            //});
+            //Assert.NotNull(transactionSignExtention);
 
-            Assert.True(transactionSignExtention.Result.Result);
+            //Assert.True(transactionSignExtention.Result.Result);
 
-            var transactionSigned = transactionSignExtention.Transaction;
+            //var transactionSigned = transactionSignExtention.Transaction;
 
+            //var transactionBytes = transaction.ToByteArray();
+
+            //var transaction4 = SignTransaction2Byte(transactionBytes, privateStr.HexToByteArray(), transactionSigned);
+
+
+            //var transaction5 = transactionSigned.ToByteArray();
+
+            //Assert.Equal(transaction4.ToHex(), transaction5.ToHex());
+
+            //var result = await _wallet.BroadcastTransactionAsync(transactionSigned);
+            #endregion
+
+            //本地签名
             var transactionBytes = transaction.ToByteArray();
+            var signedBytes = SignTransaction2Byte(transactionBytes, privateStr.HexToByteArray(), transaction);
+            var transactionSigned = Transaction.Parser.ParseFrom(signedBytes);
 
-            var transaction4 = SignTransaction2Byte(transactionBytes, privateStr.HexToByteArray(), transactionSigned);
-
-
-            var transaction5 = transactionSigned.ToByteArray();
-
-            Assert.Equal(transaction4.ToHex(), transaction5.ToHex());
-
+            //广播交易
             var result = await _wallet.BroadcastTransactionAsync(transactionSigned);
 
             Assert.True(result.Result);
@@ -64,7 +69,6 @@ namespace TronNet.Test
 
         private async Task<TransactionExtention> CreateTransactionAsync(string from, string to, long amount)
         {
-
             var fromAddress = Base58Encoder.DecodeFromBase58Check(from);
             var toAddress = Base58Encoder.DecodeFromBase58Check(to);
 

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using TronNet.Accounts;
 
 namespace TronNet
 {
@@ -28,6 +25,7 @@ namespace TronNet
             services.AddTransient<IWalletClient, WalletClient>();
             services.AddSingleton<Contracts.IContractClientFactory, Contracts.ContractClientFactory>();
             services.AddTransient<Contracts.TRC20ContractClient>();
+            services.AddTransient<ITronAccountWallet, TronAccountWallet>();
             services.Configure(setupAction);
 
             return services;

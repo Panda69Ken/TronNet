@@ -1,9 +1,6 @@
 ﻿using Grpc.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TronNet
 {
@@ -14,13 +11,15 @@ namespace TronNet
 
         public GrpcChannelOption SolidityChannel { get; set; }
 
-        public string ApiKey { get; set; }
+        public List<string> ApiKeys { get; set; }
 
         internal Metadata GetgRPCHeaders()
         {
+            var num = new Random().Next(0, ApiKeys.Count);
+
             return new Metadata
             {
-                { "TRON-PRO-API-KEY", ApiKey }
+                { "TRON-PRO-API-KEY", ApiKeys[num] }
             };
         }
     }
