@@ -2,6 +2,7 @@
 using Grpc.Core;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using TronNet.Accounts;
 using TronNet.Crypto;
 using TronNet.Protocol;
@@ -81,16 +82,26 @@ namespace TronNet
 
         public Metadata GetHeaders()
         {
-            var num = _rand.Next(0, _options.Value.ApiKeys.Count);
+            string apiKey = "";
 
-            var apiKey = _options.Value.ApiKeys[num];
+            if (_options.Value.ApiKeys.Count != 0)
+            {
+                if (_options.Value.ApiKeys.Count == 1)
+                {
+                    apiKey = _options.Value.ApiKeys[0];
+                }
+                else
+                {
+                    var num = _rand.Next(0, _options.Value.ApiKeys.Count);
 
-            var headers = new Metadata
+                    apiKey = _options.Value.ApiKeys[num];
+                }
+            }
+
+            return new Metadata
             {
                 { "TRON-PRO-API-KEY", apiKey }
             };
-
-            return headers;
         }
     }
 }

@@ -15,11 +15,25 @@ namespace TronNet
 
         internal Metadata GetgRPCHeaders()
         {
-            var num = new Random().Next(0, ApiKeys.Count);
+            string apiKey = "";
+
+            if (ApiKeys.Count != 0)
+            {
+                if (ApiKeys.Count == 1)
+                {
+                    apiKey = ApiKeys[0];
+                }
+                else
+                {
+                    var num = new Random().Next(0, ApiKeys.Count);
+
+                    apiKey = ApiKeys[num];
+                }
+            }
 
             return new Metadata
             {
-                { "TRON-PRO-API-KEY", ApiKeys[num] }
+                { "TRON-PRO-API-KEY", apiKey }
             };
         }
     }
