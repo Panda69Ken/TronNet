@@ -18,6 +18,8 @@ namespace TronNet
         {
             _channelClient = channelClient;
             _options = options;
+
+            _rand = new Random();
         }
 
         public Wallet.WalletClient GetProtocol()
