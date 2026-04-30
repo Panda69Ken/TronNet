@@ -154,3 +154,5 @@ namespace TronNetTest
 - 5.添加操作TRX交易与读余额的ITronAccountWallet接口与实现类
 - 6.优化IContractClient、TRC20ContractClient里的TransferAsync、BalanceOfAsync
 
+#### 2026-04-30修改内容
+- 把StowayNet.Extensions.DependencyInjection项目整合进来

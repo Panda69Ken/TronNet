@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37111.16 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TronNet.Protocol", "src\TronNet.Protocol\TronNet.Protocol.csproj", "{2787BE3F-B61E-439C-9CFC-A3E2D3D99489}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TronNet.Crypto.Test", "test\TronNet.Crypto.Test\TronNet.Crypto.Test.csproj", "{E8C12D48-4E2A-41C8-B7C2-607FB53F78DC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TronNet.Test", "test\TronNet.Test\TronNet.Test.csproj", "{81FBD414-722A-407B-99F2-84D83B11ABF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StowayNet.Extensions.DependencyInjection", "src\StowayNet.Extensions.DependencyInjection\StowayNet.Extensions.DependencyInjection.csproj", "{CE72288D-9DF8-6C98-4F23-892A62112CF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{81FBD414-722A-407B-99F2-84D83B11ABF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81FBD414-722A-407B-99F2-84D83B11ABF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81FBD414-722A-407B-99F2-84D83B11ABF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE72288D-9DF8-6C98-4F23-892A62112CF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE72288D-9DF8-6C98-4F23-892A62112CF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE72288D-9DF8-6C98-4F23-892A62112CF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE72288D-9DF8-6C98-4F23-892A62112CF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{55126F09-B36D-4986-B172-BD0E4F11A7F9} = {52F5F682-1C4D-434D-B5AE-D6A297C9531F}
 		{E8C12D48-4E2A-41C8-B7C2-607FB53F78DC} = {0F3402C3-5B98-4243-8B68-EC0C4FA042F6}
 		{81FBD414-722A-407B-99F2-84D83B11ABF6} = {0F3402C3-5B98-4243-8B68-EC0C4FA042F6}
+		{CE72288D-9DF8-6C98-4F23-892A62112CF6} = {52F5F682-1C4D-434D-B5AE-D6A297C9531F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A921CD51-4DBC-4633-A4A0-5E9A2C7129A1}
